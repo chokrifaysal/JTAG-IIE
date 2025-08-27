@@ -55,16 +55,8 @@ $(WINBUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(WINBUILDDIR)
 $(WINBINDIR) $(WINBUILDDIR):
 	mkdir -p $@
 
-# Extract static library from DLL if needed
-$(SRCDIR)/libftd2xx.a: $(SRCDIR)/FTD2XX.dll
-	@echo "Creating static library from DLL..."
-	$(MINGW_PREFIX)-dlltool -d $(SRCDIR)/FTD2XX.def -l $(SRCDIR)/libftd2xx.a 2>/dev/null || \
-	$(MINGW_PREFIX)-dlltool --input-def $(SRCDIR)/FTD2XX.def --output-lib $(SRCDIR)/libftd2xx.a 2>/dev/null || \
-	(echo "Warning: Could not create static library from DLL" && touch $(SRCDIR)/libftd2xx.a)
-
 clean:
 	rm -rf $(BUILDDIR) $(BINDIR) $(WINBUILDDIR) $(WINBINDIR)
-	rm -f $(SRCDIR)/libftd2xx.a
 
 run: $(TARGET)
 	./$(TARGET)
@@ -72,4 +64,3 @@ run: $(TARGET)
 win-setup:
 	@echo "Local FTD2XX files detected:"
 	@ls $(SRCDIR)/FTD2XX.* 2>/dev/null || echo "FTD2XX files missing"
-	@echo "Windows build uses: FTD2XX.dll + FTD2XX.H + libftd2xx.a"
