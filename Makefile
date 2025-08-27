@@ -57,6 +57,7 @@ $(WINBINDIR) $(WINBUILDDIR):
 
 clean:
 	rm -rf $(BUILDDIR) $(BINDIR) $(WINBUILDDIR) $(WINBINDIR)
+	rm -f $(SRCDIR)/libftd2xx.a
 
 run: $(TARGET)
 	./$(TARGET)
