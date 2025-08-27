@@ -18,11 +18,11 @@ BINDIR = bin
 WINBUILDDIR = build-win
 WINBINDIR = bin-win
 
-# Linux sources (excludes Windows-specific files)
+# Linux sources
 LINUX_SOURCES = $(filter-out $(SRCDIR)/winftdi.cpp, $(wildcard $(SRCDIR)/*.cpp))
 LINUX_OBJECTS = $(LINUX_SOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
 
-# Windows sources (excludes Linux-specific files)
+# Windows sources
 WIN_SOURCES = $(filter-out $(SRCDIR)/ftdi.cpp, $(wildcard $(SRCDIR)/*.cpp))
 WIN_OBJECTS = $(WIN_SOURCES:$(SRCDIR)/%.cpp=$(WINBUILDDIR)/%.o)
 
@@ -44,7 +44,6 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(BUILDDIR)
 $(BINDIR) $(BUILDDIR):
 	mkdir -p $@
 
-# Windows cross-compilation (FTD2XX-based, no libftdi needed)
 win-cross: $(WINTARGET)
 
 $(WINTARGET): $(WIN_OBJECTS) | $(WINBINDIR)
@@ -62,9 +61,6 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
-# Setup verification
 win-setup:
-	@echo "Checking MinGW cross-compiler..."
-	@$(MINGW_CXX) --version || (echo "Install: sudo pacman -S mingw-w64-gcc" && false)
-	@echo "Linux build: make linux"
-	@echo "Windows build: make win-cross"
+	@echo "MinGW path: /usr/$(MINGW_PREFIX)"
+	@echo "Windows build uses FTD2XX (no additional libs needed)"
