@@ -10,7 +10,7 @@ LINUX_LDLIBS = -lftdi1
 MINGW_PREFIX = x86_64-w64-mingw32
 MINGW_CXX = $(MINGW_PREFIX)-g++
 MINGW_CFLAGS = -std=c++20 -Wall -Wextra -O2 -g -static
-MINGW_LDFLAGS = -static -lws2_32 -lsetupapi
+MINGW_LDFLAGS = -static -lftd2xx -lsetupapi -lws2_32
 
 SRCDIR = src
 BUILDDIR = build
@@ -61,6 +61,8 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
+# Setup verification
 win-setup:
 	@echo "MinGW path: /usr/$(MINGW_PREFIX)"
-	@echo "Windows build uses FTD2XX (no additional libs needed)"
+	@echo "Windows build needs FTD2XX library on target system"
+	@echo "Download from: https://ftdichip.com/drivers/d2xx.htm"
