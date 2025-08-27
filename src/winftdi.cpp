@@ -78,7 +78,6 @@ public:
         if (pin != JtagPin::TDO) return false;
         
         uint8_t val;
-        DWORD read;
         FT_GetBitMode(handle, &val);
         return val & 0x10;  // TDO on bit 4
     }
