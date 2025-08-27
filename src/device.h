@@ -54,8 +54,8 @@ public:
     
 private:
     uint32_t id;
-    const DeviceInfo* info_;
     Jtag* jtag;
+    const DeviceInfo* info_;
     
     bool is_arm;
     uint32_t dap_base;

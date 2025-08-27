@@ -125,6 +125,8 @@ bool Device::ap_select(uint8_t ap, uint32_t addr) {
 }
 
 bool Device::mem_ap_transfer(uint32_t addr, uint32_t* data, bool write) {
+    (void)addr;  // Suppress unused parameter warning
+    
     uint8_t ir = write ? 0x8b : 0x8b;  // APACC
     uint8_t buf[4];
     

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -g
+CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -g -I/usr/include/libftdi1
 LDFLAGS = -lpthread -lftdi1
 
 SRCDIR = src

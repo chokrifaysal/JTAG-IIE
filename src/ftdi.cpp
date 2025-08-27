@@ -1,5 +1,5 @@
 #include "jtag.h"
-#include <ftdi.h>
+#include <libftdi1/ftdi.h>
 #include <iostream>
 
 class FtdiAdapter : public JtagAdapter {
