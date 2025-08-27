@@ -1,5 +1,9 @@
 #include "jtag.h"
+#ifdef _WIN32
+#include <ftd2xx.h>
+#else
 #include <libftdi1/ftdi.h>
+#endif
 #include <iostream>
 #include <unistd.h>
 
@@ -13,6 +17,7 @@ public:
     }
     
     bool open() override {
+#ifndef _WIN32
         ftdi = ftdi_new();
         if (!ftdi) {
             std::cerr << "Failed to create FTDI context\n";
@@ -35,17 +40,24 @@ public:
         ftdi_write_data(ftdi, &state, 1);
         
         return true;
+#else
+        std::cerr << "Linux FTDI adapter not available on Windows\n";
+        return false;
+#endif
     }
     
     void close() override {
+#ifndef _WIN32
         if (ftdi) {
             ftdi_usb_close(ftdi);
             ftdi_free(ftdi);
             ftdi = nullptr;
         }
+#endif
     }
     
     void set_pin(JtagPin::Type pin, bool value) override {
+#ifndef _WIN32
         uint8_t mask = 0;
         switch (pin) {
             case JtagPin::TCK: mask = 0x01; break;
@@ -59,22 +71,33 @@ public:
         else state &= ~mask;
         
         ftdi_write_data(ftdi, &state, 1);
+#endif
     }
     
     bool get_pin(JtagPin::Type pin) override {
+#ifndef _WIN32
         if (pin != JtagPin::TDO) return false;
         
         uint8_t val;
         ftdi_read_pins(ftdi, &val);
         return val & 0x10;  // TDO on bit 4
+#else
+        return false;
+#endif
     }
     
     void delay(unsigned us) override {
+#ifndef _WIN32
         usleep(us);
+#else
+        Sleep(us / 1000);
+#endif
     }
     
 private:
-    uint32_t vid, pid;
+#ifndef _WIN32
     ftdi_context* ftdi;
+#endif
+    uint32_t vid, pid;
     uint8_t state;
 };

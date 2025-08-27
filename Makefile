@@ -12,7 +12,7 @@ endif
 # Windows cross-compilation
 MINGW_PREFIX = x86_64-w64-mingw32
 MINGW_CXX = $(MINGW_PREFIX)-g++
-MINGW_CFLAGS = -std=c++20 -Wall -Wextra -O2 -g -static
+MINGW_CFLAGS = -std=c++20 -Wall -Wextra -O2 -g -static -I/usr/$(MINGW_PREFIX)/include/libftdi1
 MINGW_LDFLAGS = -static -lftdi1 -lusb-1.0 -lws2_32 -lsetupapi
 
 SRCDIR = src
@@ -62,5 +62,7 @@ run: $(TARGET)
 # Setup check
 win-setup:
 	@echo "Checking MinGW cross-compiler..."
-	@$(MINGW_CXX) --version || (echo "MinGW not found. Install with: sudo pacman -S mingw-w64" && false)
-	@echo "MinGW setup complete"
+	@$(MINGW_CXX) --version || (echo "MinGW not found. Install with: sudo pacman -S mingw-w64-gcc" && false)
+	@echo "Checking FTDI headers..."
+	@test -f /usr/$(MINGW_PREFIX)/include/libftdi1/ftdi.h || (echo "FTDI headers missing. Install with: sudo pacman -S libftdi" && false)
+	@echo "Windows build setup complete"
