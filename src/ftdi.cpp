@@ -1,6 +1,7 @@
 #include "jtag.h"
 #include <libftdi1/ftdi.h>
 #include <iostream>
+#include <unistd.h>
 
 class FtdiAdapter : public JtagAdapter {
 public:
@@ -73,7 +74,7 @@ public:
     }
     
 private:
-    ftdi_context* ftdi;
     uint32_t vid, pid;
+    ftdi_context* ftdi;
     uint8_t state;
 };
