@@ -44,10 +44,18 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(BUILDDIR)
 $(BINDIR) $(BUILDDIR):
 	mkdir -p $@
 
+# Windows cross-compilation
 win-cross: $(WINTARGET)
 
 $(WINTARGET): $(WIN_OBJECTS) $(SRCDIR)/libftd2xx.a | $(WINBINDIR)
 	$(MINGW_CXX) $(WIN_OBJECTS) $(SRCDIR)/libftd2xx.a -o $@ $(MINGW_LDFLAGS)
+
+# Auto-create static library from DLL
+$(SRCDIR)/libftd2xx.a: $(SRCDIR)/FTD2XX.dll $(SRCDIR)/FTD2XX.def
+	@echo "Creating Windows static library..."
+	$(MINGW_PREFIX)-dlltool -d $(SRCDIR)/FTD2XX.def -l $@ 2>/dev/null || \
+	$(MINGW_PREFIX)-dlltool --input-def $(SRCDIR)/FTD2XX.def --output-lib $@ 2>/dev/null || \
+	(echo "Failed to create library - check MinGW tools" && exit 1)
 
 $(WINBUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(WINBUILDDIR)
 	$(MINGW_CXX) $(MINGW_CFLAGS) -c $< -o $@
@@ -62,6 +70,9 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
+# Setup verification
 win-setup:
-	@echo "Local FTD2XX files detected:"
-	@ls $(SRCDIR)/FTD2XX.* 2>/dev/null || echo "FTD2XX files missing"
+	@echo "Checking Windows build dependencies..."
+	@test -f $(SRCDIR)/FTD2XX.dll || echo "Warning: FTD2XX.dll missing"
+	@test -f $(SRCDIR)/FTD2XX.H || echo "Warning: FTD2XX.H missing"
+	@$(MINGW_PREFIX)-dlltool --version 2>/dev/null || echo "Install: sudo pacman -S mingw-w64-binutils"
