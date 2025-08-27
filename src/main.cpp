@@ -7,8 +7,10 @@
 
 #ifdef _WIN32
 #include "winftdi.cpp"
+using AdapterType = WinFtdiAdapter;
 #else
 #include "ftdi.cpp"
+using AdapterType = FtdiAdapter;
 #endif
 
 void usage(const char* name) {
@@ -35,12 +37,7 @@ int main(int argc, char* argv[])
 
     std::string cmd = argv[1];
     
-#ifdef _WIN32
-    WinFtdiAdapter adapter;
-#else
-    FtdiAdapter adapter;
-#endif
-    
+    AdapterType adapter;
     Jtag jtag(&adapter);
     
     if (!jtag.init()) {
