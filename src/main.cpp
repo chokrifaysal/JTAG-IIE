@@ -2,9 +2,14 @@
 #include <string>
 #include <fstream>
 #include "jtag.h"
-#include "ftdi.cpp"
 #include "device.h"
 #include "flash.h"
+
+#ifdef _WIN32
+#include "winftdi.cpp"
+#else
+#include "ftdi.cpp"
+#endif
 
 void usage(const char* name) {
     std::cout << "Usage: " << name << " <command> [args...]\n"
@@ -30,7 +35,12 @@ int main(int argc, char* argv[])
 
     std::string cmd = argv[1];
     
+#ifdef _WIN32
+    WinFtdiAdapter adapter;
+#else
     FtdiAdapter adapter;
+#endif
+    
     Jtag jtag(&adapter);
     
     if (!jtag.init()) {
