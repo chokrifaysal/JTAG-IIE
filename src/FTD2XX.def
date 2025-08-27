@@ -1,0 +1,8 @@
+EXPORTS
+FT_Open
+FT_Close
+FT_Write
+FT_GetBitMode
+FT_SetBitMode
+FT_SetBaudRate
+FT_CreateDeviceInfoList
