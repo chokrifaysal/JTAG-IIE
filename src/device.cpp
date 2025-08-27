@@ -1,6 +1,7 @@
 #include "device.h"
 #include "jtag.h"
 #include <iostream>
+#include <cstring>
 
 DeviceDB& DeviceDB::instance() {
     static DeviceDB db;

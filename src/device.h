@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <cstring>
+
+class Jtag;
 
 struct FlashRegion {
     uint32_t addr;
