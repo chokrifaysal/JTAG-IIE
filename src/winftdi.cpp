@@ -1,12 +1,12 @@
 #include "jtag.h"
 #include <windows.h>
-#include <ftd2xx.h>
+#include "ftd2xx.h"
 #include <iostream>
 
 class WinFtdiAdapter : public JtagAdapter {
 public:
     WinFtdiAdapter(uint32_t vid = 0x0403, uint32_t pid = 0x6010) 
-        : vid(vid), pid(pid), handle(nullptr) {}
+        : vid(vid), pid(pid), handle(nullptr), state(0), bytesWritten(0) {}
     
     ~WinFtdiAdapter() {
         if (handle) close();

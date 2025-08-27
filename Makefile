@@ -2,18 +2,15 @@ CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -g
 LDFLAGS = -lpthread
 
-# Detect OS
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-    LINUX_LDLIBS = -lftdi1
-    LINUX_CXXFLAGS = -I/usr/include/libftdi1
-endif
+# Linux build settings
+LINUX_CXXFLAGS = -I/usr/include/libftdi1
+LINUX_LDLIBS = -lftdi1
 
 # Windows cross-compilation
 MINGW_PREFIX = x86_64-w64-mingw32
 MINGW_CXX = $(MINGW_PREFIX)-g++
-MINGW_CFLAGS = -std=c++20 -Wall -Wextra -O2 -g -static -I/usr/$(MINGW_PREFIX)/include/libftdi1
-MINGW_LDFLAGS = -static -lftdi1 -lusb-1.0 -lws2_32 -lsetupapi
+MINGW_CFLAGS = -std=c++20 -Wall -Wextra -O2 -g -static
+MINGW_LDFLAGS = -static -lws2_32 -lsetupapi
 
 SRCDIR = src
 BUILDDIR = build
@@ -21,19 +18,25 @@ BINDIR = bin
 WINBUILDDIR = build-win
 WINBINDIR = bin-win
 
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
-WINOBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(WINBUILDDIR)/%.o)
+# Linux sources (excludes Windows-specific files)
+LINUX_SOURCES = $(filter-out $(SRCDIR)/winftdi.cpp, $(wildcard $(SRCDIR)/*.cpp))
+LINUX_OBJECTS = $(LINUX_SOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
+
+# Windows sources (excludes Linux-specific files)
+WIN_SOURCES = $(filter-out $(SRCDIR)/ftdi.cpp, $(wildcard $(SRCDIR)/*.cpp))
+WIN_OBJECTS = $(WIN_SOURCES:$(SRCDIR)/%.cpp=$(WINBUILDDIR)/%.o)
 
 TARGET = $(BINDIR)/jtag
 WINTARGET = $(WINBINDIR)/jtag.exe
 
-.PHONY: all clean win-cross win-setup
+.PHONY: all clean linux win-cross win-setup
 
-all: $(TARGET)
+all: linux
 
-$(TARGET): $(OBJECTS) | $(BINDIR)
-	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS) $(LINUX_LDLIBS)
+linux: $(TARGET)
+
+$(TARGET): $(LINUX_OBJECTS) | $(BINDIR)
+	$(CXX) $(LINUX_OBJECTS) -o $@ $(LDFLAGS) $(LINUX_LDLIBS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) $(LINUX_CXXFLAGS) -c $< -o $@
@@ -41,11 +44,11 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(BUILDDIR)
 $(BINDIR) $(BUILDDIR):
 	mkdir -p $@
 
-# Windows cross-compilation
+# Windows cross-compilation (FTD2XX-based, no libftdi needed)
 win-cross: $(WINTARGET)
 
-$(WINTARGET): $(WINOBJECTS) | $(WINBINDIR)
-	$(MINGW_CXX) $(WINOBJECTS) -o $@ $(MINGW_LDFLAGS)
+$(WINTARGET): $(WIN_OBJECTS) | $(WINBINDIR)
+	$(MINGW_CXX) $(WIN_OBJECTS) -o $@ $(MINGW_LDFLAGS)
 
 $(WINBUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(WINBUILDDIR)
 	$(MINGW_CXX) $(MINGW_CFLAGS) -c $< -o $@
@@ -59,10 +62,9 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
-# Setup check
+# Setup verification
 win-setup:
 	@echo "Checking MinGW cross-compiler..."
-	@$(MINGW_CXX) --version || (echo "MinGW not found. Install with: sudo pacman -S mingw-w64-gcc" && false)
-	@echo "Checking FTDI headers..."
-	@test -f /usr/$(MINGW_PREFIX)/include/libftdi1/ftdi.h || (echo "FTDI headers missing. Install with: sudo pacman -S libftdi" && false)
-	@echo "Windows build setup complete"
+	@$(MINGW_CXX) --version || (echo "Install: sudo pacman -S mingw-w64-gcc" && false)
+	@echo "Linux build: make linux"
+	@echo "Windows build: make win-cross"
